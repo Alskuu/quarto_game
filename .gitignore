@@ -1,3 +1,6 @@
 __pycache__/
-resultats.json
 .DS_Store
+__pycache__/
+.mypy_cache/
+
+resultats.json
