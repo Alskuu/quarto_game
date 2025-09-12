@@ -27,3 +27,6 @@ https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 Pour MiniMax nous nous sommes aussi inspiré d'un github auquel nous avons apporté pleins de modifications poru faire en sorte que :
 - le placement de la pièce choisie par l'adversaire soit aussi un choix stratégique (et pas seulement le choix de la pièce)
 - Je garde quand même la même profondeur d'arbre car sinon cela prendrait trop de temps
+
+Si vous êtes intéressés pour avoir les résultats de tous les matchs pour s'éviter les plusieurs heures nécessaires pour faire fonctionner le programme.
+Contactez moi via mon mail a.riahii@outlook.fr
