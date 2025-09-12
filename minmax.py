@@ -1,0 +1,214 @@
+from copy import deepcopy
+import random
+import itertools
+import numpy
+
+EVAL_TIE = 0  # cette valeur pour les matchs nuls a seulement un intérêt en fin de jeu, où l'heuristique n'importera plus
+EVAL_WIN = 1 
+MAX_DEPTH = 4
+
+# Les lignes suivantes sont inspirées du pseudo-code du alphabeta pruning sur le wikipedia d'alpha-beta pruning
+def minmax1(game, depth, maximizingPlayer, phase, alpha=-float('inf'), beta=float('inf')):
+    # phase = "placement" ou "selection"
+    
+    if depth == 0 or game.check_winner() != -1:
+        return state_eval(game, depth, maximizingPlayer)
+    
+    if phase == "placement":
+        # On doit placer la pièce donnée
+        moves = get_all_possible_moves(game)
+        if maximizingPlayer:
+            best = -float('inf')
+            for move in moves:
+                g = deepcopy(game) # C'est crucial ici : permet de ne pas modifier l'état véritable du jeu
+                g.place(move[0], move[1])
+                # après un placement, on passe à la phase "selection"
+                val = minmax1(g, depth-1, maximizingPlayer, "selection")
+                best = max(best, val)
+                alpha = max(alpha, best)
+                if beta <= alpha:
+                    break
+            return best
+        else:
+            best = float('inf')
+            for move in moves:
+                g = deepcopy(game)
+                g.place(move[0], move[1])
+                val = minmax1(g, depth-1, maximizingPlayer, "selection")
+                best = min(best, val)
+                beta = min(beta, best)
+                if beta <= alpha:
+                    break
+            return best
+    
+    elif phase == "selection":
+        # Ici, le joueur choisit une pièce pour l’autre
+        available_pieces = list(set(range(16)) - set(game._board.ravel()))
+        if maximizingPlayer:
+            best = -float('inf')
+            for piece in available_pieces:
+                g = deepcopy(game)
+                g.select(piece)
+                val = minmax1(g, depth-1, not maximizingPlayer, "placement")
+                best = max(best, val)
+                alpha = max(alpha, best)
+                if beta <= alpha:
+                    break
+            return best
+        else:
+            best = float('inf')
+            for piece in available_pieces:
+                g = deepcopy(game)
+                g.select(piece)
+                val = minmax1(g, depth-1, not maximizingPlayer, "placement")
+                best = min(best, val)
+                beta = min(beta, best)
+                if beta <= alpha:
+                    break
+            return best
+
+def minmax2(game, depth, maximizingPlayer, alpha:float=-float('inf'), beta:float=float('inf')):
+    if depth == 0 or game.check_winner() != -1:
+        return state_eval(game, depth, maximizingPlayer)
+    
+    # On doit placer la pièce donnée
+    moves = get_all_possible_moves(game)
+    if maximizingPlayer:
+        best = -float('inf')
+        for move in moves:
+            g = deepcopy(game) # C'est crucial ici : permet de ne pas modifier l'état véritable du jeu
+            g.place(move[0], move[1])
+            # après un placement, on passe à la phase "selection"
+            val = minmax2(g, depth-1,  not maximizingPlayer)
+            best = max(best, val)
+            alpha = max(alpha, best)
+            if beta <= alpha:
+                break
+        return best
+    else:
+        best = float('inf')
+        for move in moves:
+            g = deepcopy(game)
+            g.place(move[0], move[1])
+            val = minmax2(g, depth-1, not maximizingPlayer)
+            best = min(best, val)
+            beta = min(beta, best)
+            if beta <= alpha:
+                break
+        return best
+
+def minmax3(game,depth, maximizingPlayer, alpha=-float('inf'), beta=float('inf')):
+    if depth == 0 or game.check_winner() != -1:
+        return state_eval(game, depth, maximizingPlayer)
+    # Ici, le joueur choisit une pièce pour l’autre
+    available_pieces = list(set(range(16)) - set(game._board.ravel()))
+    if maximizingPlayer:
+        best = -float('inf')
+        for piece in available_pieces:
+            g = deepcopy(game)
+            g.select(piece)
+            val = minmax3(g, depth-1, not maximizingPlayer)
+            best = max(best, val)
+            alpha = max(alpha, best)
+            if beta <= alpha:
+                break
+        return best
+    else:
+        best = float('inf')
+        for piece in available_pieces:
+            g = deepcopy(game)
+            g.select(piece)
+            val = minmax3(g, depth-1, not maximizingPlayer)
+            best = min(best, val)
+            beta = min(beta, best)
+            if beta <= alpha:
+                break
+        return best
+
+def play_move(game, depth, joueur):
+    scored_moves = []
+
+    tour = game.check_tour()
+    if tour == 1:
+        scored_moves.append(((0,0),10))
+    
+    else:
+        if joueur==1:
+            for move in get_all_possible_moves(game):
+                game_t = deepcopy(game)
+                game_t.place(move[0], move[1])
+                scored_moves.append((move, minmax1(game_t, depth, True,"placement"))) ## Selon moi c'est nécessairement True ici, dans le sens où c'est le move qu'on veut pour nous faire gagner !!
+            scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
+
+        elif joueur==2:
+            for move in get_all_possible_moves(game):
+                game_t = deepcopy(game)
+                game_t.place(move[0], move[1])
+                scored_moves.append((move,minmax2(game_t, depth, True)))
+            scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
+
+
+        else:
+            for move in get_all_possible_moves(game):
+                game_t = deepcopy(game)
+                game_t.place(move[0], move[1])
+                scored_moves.append((move,minmax3(game_t, depth, True)))
+            scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
+
+
+    return scored_moves[0][0] if scored_moves[0][1] != float('-inf') or  scored_moves[0][1] != -1 else None 
+
+def play_piece(game,depth, joueur):
+    scored_pieces = []
+
+    tour = game.check_tour()
+    if tour == 1:
+        scored_pieces.append((0, 10))
+    
+    else:
+        if joueur==1:
+            for piece in list(set(range(16)) - set(game._board.ravel())):
+                game_t = deepcopy(game)
+                game_t.select(piece)
+                scored_pieces.append((piece,minmax1(game_t, depth, False, "selection")))
+            scored_pieces.sort(key=lambda x: x[1], reverse=True)
+        
+        elif joueur==2:
+            for piece in list(set(range(16)) - set(game._board.ravel())):
+                game_t = deepcopy(game)
+                game_t.select(piece)
+                scored_pieces.append((piece,minmax2(game_t, depth, False)))
+            scored_pieces.sort(key=lambda x: x[1], reverse=True)
+        
+        else:
+            for piece in list(set(range(16)) - set(game._board.ravel())):
+                game_t = deepcopy(game)
+                game_t.place(piece)
+                scored_pieces.append((piece,minmax3(game_t, depth, True)))
+            scored_pieces.sort(key=lambda x: x[1], reverse=True)
+
+
+    return scored_pieces[0][0] if scored_pieces[0][1] != float('-inf') or  scored_pieces[0][1] != -1 else None 
+
+# récupère la liste de tous les coups possibles
+def get_all_possible_moves(game_state):
+    list = []
+    board = game_state.get_board_status()
+    for i in range(4):
+        for j in range(4):
+            if board[i][j] == -1:
+                list.append((j, i))
+    return list
+
+def state_eval(game_state, depth, is_maximizing):
+    '''
+    Computes the evaluation of the state of the game
+    '''
+    if game_state.check_winner() != -1:
+        return -float('inf') if not is_maximizing else EVAL_WIN + depth 
+        # Lorsque le joueur adverse a joué juste avant nous avons is_maximizing = True et donc ici cela signifie que le minmaxplayer concerné a perdu
+        # et dans l'autre cas cela vaut un certain score selon le tour (depth) auquel on gagne
+    elif game_state.check_finished():
+        return 0
+    else:
+        return -1
