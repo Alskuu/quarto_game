@@ -55,19 +55,20 @@ def main():
             resultats= json.load(f)
     else:
         resultats = {}
-    
+    '''
     wr, dr, tours_moyens, mean_time_taken = run_multiple_games(n_games, RandomPlayer, (), RandomPlayer, ())
     resultats.setdefault("Random vs Random", {})
     resultats["Random vs Random"]["wins"]= wr
     resultats["Random vs Random"]["draws"] = dr
     resultats["Random vs Random"]["tours_moyens"]= tours_moyens
     resultats["Random vs Random"]["temps moyen pris en secondes"]= mean_time_taken
+    '''
 
     with open(resultats_path, "w") as f:
         json.dump(resultats,f,ensure_ascii=False, indent=2)
     # Random vs MinMax(3)
     print("Lancement de la partie de Random vs negamax_selection_specialized")
-    wr, dr, tours_moyens, mean_time_taken = run_multiple_games(n_games, RandomPlayer, (), MinMax, (1,))
+    wr, dr, tours_moyens, mean_time_taken = run_multiple_games(n_games, RandomPlayer, (), MinMax, (3,))
     print(f"Random vs negamax_selection_specialized ({n_games} games): wins: {wr}, draws: {dr}")
     resultats.setdefault("Random vs negamax_selection_specialized", {})
     resultats["Random vs negamax_selection_specialized"]["wins"]= wr
@@ -140,6 +141,3 @@ if __name__ == '__main__':
         main_gui()
     else:
         main()
-    
-
-## NOUVELLE ETAPE : run_cli et run_gui à rendre disponible, une fois cela réalisé : tout est bon !!

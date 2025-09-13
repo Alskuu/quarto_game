@@ -3,6 +3,8 @@ import random
 import itertools
 import numpy
 
+from heuristics import get_all_possible_moves, state_eval_abs
+
 EVAL_TIE = 0  # cette valeur pour les matchs nuls a seulement un intérêt en fin de jeu, où l'heuristique n'importera plus
 EVAL_WIN = 10000 # Grand score qui doit être largement supérieur à la somme des heuristiques.
 MAX_DEPTH = 4
@@ -71,12 +73,10 @@ def minmax1(game, depth, maximizingPlayer, phase, alpha=-INF, beta=INF):
         
 def eval_for_current_player(game, depth, phase):
     """
-    Cette fonction doit renvoyer un score positif si la position est bonne
-    pour LE JOUEUR QUI DOIT JOUER dans 'game' (point de vue courant).
-    """
+    Cette fonction doit renvoyer un score positif si la position est bonne pour le joueur considéré"""
     piece_to_place = game.get_selected_piece() if phase == "placement" else None
     # state_eval_abs doit renvoyer une magnitude >=0 ; le signe est géré par negamax.
-    return state_eval_abs(game, depth, True)
+    return state_eval_abs(game, phase, piece_to_place, depth)
 
 
 def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
@@ -212,7 +212,6 @@ def negamax_placement_specialized(game, depth, phase, alpha=-INF, beta=INF):
         piece = random.choice(available_pieces)
         g = deepcopy(game)
         g.select(piece)
-        g._current_player = (g.get_current_player() + 1) % game.MAX_PLAYERS
         return -negamax_placement_specialized(g, depth-1, "placement", -beta, -alpha)
 
 def negamax_selection_specialized(game, depth, phase, alpha=-INF, beta=INF):
@@ -256,14 +255,14 @@ def play_move(game, depth, joueur):
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
-                scored_moves.append((move, negamax_complete(game_t, depth, True,"placement"))) ## Selon moi c'est nécessairement True ici, dans le sens où c'est le move qu'on veut pour nous faire gagner !!
+                scored_moves.append((move, negamax_complete(game_t, depth,"placement"))) ## Selon moi c'est nécessairement True ici, dans le sens où c'est le move qu'on veut pour nous faire gagner !!
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
 
         elif joueur==2:
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
-                scored_moves.append((move,negamax_placement_specialized(game_t, depth, True)))
+                scored_moves.append((move,negamax_placement_specialized(game_t, depth, "placement")))
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
 
 
@@ -271,7 +270,7 @@ def play_move(game, depth, joueur):
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
-                scored_moves.append((move,negamax_selection_specialized(game_t, depth, True)))
+                scored_moves.append((move,negamax_selection_specialized(game_t, depth, "placement")))
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
 
 
@@ -279,7 +278,9 @@ def play_move(game, depth, joueur):
 
 def play_piece(game,depth, joueur):
     scored_pieces = []
-
+    # Il serait sûrement préférable de supprimer cette ligne si j'affronte une IA qui enregistre les parties et fait du reinforcement learning
+    # Car cette dernière serait avantagée en n'ayant pas à calculer les patterns du premier coup, bien qu'il faut noter que le premiier coup est clairement
+    # Le moins important des coups, bien que l'algorithme va calculer très longtemps pour trouver la solution optimale au début.
     tour = game.check_tour()
     if tour == 1:
         scored_pieces.append((0, 10))
@@ -289,37 +290,26 @@ def play_piece(game,depth, joueur):
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
                 game_t.select(piece)
-                scored_pieces.append((piece,negamax_complete(game_t, depth, False, "selection")))
+                scored_pieces.append((piece,negamax_complete(game_t, depth, "selection")))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
         
         elif joueur==2:
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
                 game_t.select(piece)
-                scored_pieces.append((piece,negamax_placement_specialized(game_t, depth, False)))
+                scored_pieces.append((piece,negamax_placement_specialized(game_t, depth, "selection")))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
         
         else:
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
-                game_t.place(piece)
-                scored_pieces.append((piece,negamax_selection_specialized(game_t, depth, True)))
+                game_t.select(piece)
+                scored_pieces.append((piece,negamax_selection_specialized(game_t, depth, "selection")))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
-
 
     return scored_pieces[0][0] if scored_pieces[0][1] != float('-inf') or  scored_pieces[0][1] != -1 else None 
 
-# récupère la liste de tous les coups possibles
-def get_all_possible_moves(game):
-    list = []
-    board = game.get_board_status()
-    for i in range(4):
-        for j in range(4):
-            if board[i][j] == -1:
-                list.append((j, i))
-    return list
-
-def state_eval(game_state, depth, joueur):
+def state_eval(game_state, depth, is_maximizing, joueur):
     '''
     Computes the evaluation of the state of the game
     '''

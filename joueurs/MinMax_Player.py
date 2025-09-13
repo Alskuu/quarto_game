@@ -11,8 +11,17 @@ class MinMax(partie.Player):
 
     def __init__(self, partie: partie.Quarto, joueur: int) -> None:
         super().__init__(partie)
-        self.depth = MAX_DEPTH
         self.joueur = joueur
+        self.depth = self.get_depth()
+
+    
+    def get_depth(self):
+        if self.joueur==1:
+            return 4
+        else:
+            return 8
+# En effet, comme les deux autres joueurs ne calculent que le placement ou la sélection 
+# et donc à l'autre phase, le programme tourne plus rapidement bien que l'on perde un de profondeur. 
 
 
     def place_piece(self) -> tuple[int, int]:

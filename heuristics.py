@@ -1,21 +1,34 @@
 from copy import deepcopy
 import math
-from minmax import get_all_possible_moves
 
 INF = float('inf')
-WIN = 10_000  # score terminal >> somme des scores des heuristiques. Le signe sera appliqué par negamax.
+WIN = 1000  # score terminal >> somme des scores des heuristiques. Le signe sera appliqué par negamax.
+
+# récupère la liste de tous les coups possibles
+def get_all_possible_moves(game):
+    list = []
+    board = game.get_board_status()
+    for i in range(4):
+        for j in range(4):
+            if board[i][j] == -1:
+                list.append((j, i))
+    return list
 
 def get_available_pieces(game):
     used = {int(v) for v in game.get_board_status().ravel().tolist() if v != -1}
     return [p for p in range(16) if p not in used]
 
 # Lignes: 4 lignes + 4 colonnes + 2 diagonales = 10
-LINES = (
-    [[(x, y) for x in range(4)] for y in range(4)] +
-    [[(x, y) for y in range(4)] for x in range(4)] +
-    [[(i, i) for i in range(4)], [(i, 3 - i) for i in range(4)]]
-)
-LINES = [line for group in LINES for line in group]
+LINES = []
+# Ajouter les lignes horizontales
+for y in range(4):
+    LINES.append([(x, y) for x in range(4)])
+# Ajouter les colonnes verticales  
+for x in range(4):
+    LINES.append([(x, y) for y in range(4)])
+# Ajouter les diagonales
+LINES.append([(i, i) for i in range(4)])  # Diagonale principale
+LINES.append([(i, 3 - i) for i in range(4)])  # Diagonale secondaire
 
 def line_values(game, line):
     """Renvoie les indices de pièces présents sur une ligne donnée [(x,y)...]."""
@@ -84,8 +97,6 @@ def immediate_wins_with_piece_mag(game, piece):
     for (x, y) in get_all_possible_moves(game):
         g = deepcopy(game)
         g.select(piece)
-        # on simule le switch effectué dans run() après select()
-        g._current_player = (g.get_current_player() + 1) % g.MAX_PLAYERS
         g.place(x, y)
         if g.check_winner() != -1:
             count += 1
@@ -111,7 +122,6 @@ def immediate_blocks_possible_mag(game, piece):
     for (x, y) in get_all_possible_moves(game):
         g = deepcopy(game)
         g.select(piece)
-        g._current_player = (g.get_current_player() + 1) % g.MAX_PLAYERS
         g.place(x, y)
         after_t1 = 0
         for line in LINES:
@@ -184,9 +194,10 @@ def state_eval_abs(game, phase, piece_to_place, depth):
         * Phase placement : victoires immédiates, forks, cohérence, mobilité, blocages.
         * Phase sélection : sécurité (faible toxicité) + diversité des pièces.
     """
-    if game.check_winner() != -1:
+    g = deepcopy(game)
+    if g.check_winner() != -1:
         return WIN + depth
-    if game.check_finished():
+    if g.check_finished():
         return 0
 
     score = 0.0
@@ -194,10 +205,10 @@ def state_eval_abs(game, phase, piece_to_place, depth):
     if phase == "placement":
         if piece_to_place is None:
             return 0.0
-        iw  = immediate_wins_with_piece_mag(game, piece_to_place)
-        p3  = best_line_coherence_global(game)
-        mob = mobility_mag(game)
-        blk = immediate_blocks_possible_mag(game, piece_to_place)
+        iw  = immediate_wins_with_piece_mag(g, piece_to_place)
+        p3  = best_line_coherence_global(g)
+        mob = mobility_mag(g)
+        blk = immediate_blocks_possible_mag(g, piece_to_place)
 
         score += (W_IW * iw
                   + W_P3 * p3
@@ -205,7 +216,7 @@ def state_eval_abs(game, phase, piece_to_place, depth):
                   + W_BLK * blk)
 
     elif phase == "selection":
-        safe_max, safe_avg, Hdiv = selection_magnitudes(game)
+        safe_max, safe_avg, Hdiv = selection_magnitudes(g)
         score += (W_SAFE_MAX * safe_max
                   + W_SAFE_AVG * safe_avg
                   + W_DIV * Hdiv)

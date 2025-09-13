@@ -4,10 +4,34 @@
     "draws": 0,
     "tours_moyens": 8.0
   },
+  "Random vs Random 100 000 games": {
+    "wins": 48433,
+    "draws": 1963,
+    "tours_moyens": 12.67047,
+    "temps moyen pris en secondes": 0.12047006603717804
+  },
   "Random vs Random": {
-    "wins": 3,
+    "wins": 1,
     "draws": 0,
-    "tours_moyens": 10.75,
-    "temps moyen pris en secondes": 0.06015801429748535
+    "tours_moyens": 13.75,
+    "temps moyen pris en secondes": 0.1285107135772705
+  },
+  "Random vs negamax_complete": {
+    "wins": 4,
+    "draws": 0,
+    "tours_moyens": 7.0,
+    "temps moyen pris en secondes": 59.94135785102844
+  },
+  "negamax_complete vs negamax_placement_specialized": {
+    "wins": 2,
+    "draws": 0,
+    "tours_moyens": 6.0,
+    "temps moyen pris en secondes": 147.1229544878006
+  },
+  "Random vs negamax_selection_specialized": {
+    "wins": 4,
+    "draws": 0,
+    "tours_moyens": 9.0,
+    "temps moyen pris en secondes": 155.5765482187271
   }
 }
