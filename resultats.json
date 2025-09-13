@@ -3,5 +3,11 @@
     "wins": 4,
     "draws": 0,
     "tours_moyens": 8.0
+  },
+  "Random vs Random": {
+    "wins": 3,
+    "draws": 0,
+    "tours_moyens": 10.75,
+    "temps moyen pris en secondes": 0.06015801429748535
   }
 }

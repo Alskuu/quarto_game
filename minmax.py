@@ -6,9 +6,10 @@ import numpy
 EVAL_TIE = 0  # cette valeur pour les matchs nuls a seulement un intérêt en fin de jeu, où l'heuristique n'importera plus
 EVAL_WIN = 10000 # Grand score qui doit être largement supérieur à la somme des heuristiques.
 MAX_DEPTH = 4
+INF = float('inf')
 
 # Les lignes suivantes sont inspirées du pseudo-code du alphabeta pruning sur le wikipedia d'alpha-beta pruning
-def minmax1(game, depth, maximizingPlayer, phase, alpha=-float('inf'), beta=float('inf')):
+def minmax1(game, depth, maximizingPlayer, phase, alpha=-INF, beta=INF):
     # phase = "placement" ou "selection"
     
     if depth == 0 or game.check_winner() != -1:
@@ -18,7 +19,7 @@ def minmax1(game, depth, maximizingPlayer, phase, alpha=-float('inf'), beta=floa
         # On doit placer la pièce donnée
         moves = get_all_possible_moves(game)
         if maximizingPlayer:
-            best = -float('inf')
+            best = -INF
             for move in moves:
                 g = deepcopy(game) # C'est crucial ici : permet de ne pas modifier l'état véritable du jeu
                 g.place(move[0], move[1])
@@ -30,7 +31,7 @@ def minmax1(game, depth, maximizingPlayer, phase, alpha=-float('inf'), beta=floa
                     break
             return best
         else:
-            best = float('inf')
+            best = INF
             for move in moves:
                 g = deepcopy(game)
                 g.place(move[0], move[1])
@@ -45,7 +46,7 @@ def minmax1(game, depth, maximizingPlayer, phase, alpha=-float('inf'), beta=floa
         # Ici, le joueur choisit une pièce pour l’autre
         available_pieces = list(set(range(16)) - set(game._board.ravel()))
         if maximizingPlayer:
-            best = -float('inf')
+            best = -INF
             for piece in available_pieces:
                 g = deepcopy(game)
                 g.select(piece)
@@ -57,7 +58,7 @@ def minmax1(game, depth, maximizingPlayer, phase, alpha=-float('inf'), beta=floa
                     break
             return best
         else:
-            best = float('inf')
+            best = INF
             for piece in available_pieces:
                 g = deepcopy(game)
                 g.select(piece)
@@ -67,8 +68,56 @@ def minmax1(game, depth, maximizingPlayer, phase, alpha=-float('inf'), beta=floa
                 if beta <= alpha:
                     break
             return best
+        
+def eval_for_current_player(game, depth):
+    """
+    Cette fonction doit renvoyer un score positif si la position est bonne
+    pour LE JOUEUR QUI DOIT JOUER dans 'game' (point de vue courant).
+    """
+    return state_eval(game, depth, True)
 
-def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-float('inf'), beta:float=float('inf')):
+
+def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
+    # Arrêt (terminal ou horizon)
+    if depth == 0 or game.check_winner() != -1 or game.check_finished():
+        return eval_for_current_player(game, depth)
+
+    best = -INF
+
+    if phase == "placement":
+        # On place la pièce déjà sélectionnée
+        moves = get_all_possible_moves(game)  # liste de (x, y)
+        for (x, y) in moves:
+            g = deepcopy(game)
+            g.place(x, y)
+            # après un placement on passe à la phase "selection"
+            val = negamax_complete(g, depth-1, "selection", beta, alpha)
+            if val > best:
+                best = val
+            if best > alpha:
+                alpha = best
+            if alpha >= beta:
+                break  # élagage α–β
+        return best
+
+    elif phase == "selection":
+        # Ici, le joueur choisit une pièce pour l’autre
+        available_pieces = list(set(range(16)) - set(game._board.ravel()))
+        for piece in available_pieces:
+            g = deepcopy(game)
+            g.select(piece)
+            # Après la sélection, on change de joueur, et donc on veut minimiser le score du joueur adverse
+            # après la sélection on passe à la phase "placement"
+            val = -negamax_complete(g, depth-1, "placement", -beta, -alpha)
+            if val > best:
+                best = val
+            if best > alpha:
+                alpha = best
+            if alpha >= beta:
+                break
+        return best
+'''
+def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-INF, beta:float=INF):
     if depth == 0 or game.check_winner() != -1:
         return state_eval(game, depth, maximizingPlayer)
     
@@ -76,7 +125,7 @@ def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-float('inf'), beta
     moves = get_all_possible_moves(game)
     if phase == "placement":
         if maximizingPlayer:
-            best = -float('inf')
+            best = -INF
             for move in moves:
                 g = deepcopy(game) # C'est crucial ici : permet de ne pas modifier l'état véritable du jeu
                 g.place(move[0], move[1])
@@ -88,7 +137,7 @@ def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-float('inf'), beta
                     break
             return best
         else:
-            best = float('inf')
+            best = INF
             for move in moves:
                 g = deepcopy(game)
                 g.place(move[0], move[1])
@@ -100,7 +149,7 @@ def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-float('inf'), beta
             return best
     elif phase == "selection":
         if maximizingPlayer:
-            best = -float('inf')
+            best = -INF
             available_pieces = list(set(range(16)) - set(game._board.ravel()))
             g = deepcopy(game)
             piece_ok = False
@@ -111,45 +160,88 @@ def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-float('inf'), beta
             g.select(piece)
             val = minmax2(g, depth-1, "placement", not maximizingPlayer)
             best = max(best, val)
-            alpha = min(alpha, best)
-            if beta <= alpha:
-                break
             return best
         else:
-            best = float('inf')
+            best = INF
             available_pieces = list(set(range(16)) - set(game._board.ravel()))
-
-
-
-    
-
-def minmax3(game,depth, maximizingPlayer, phase, alpha=-float('inf'), beta=float('inf')):
-    if depth == 0 or game.check_winner() != -1:
-        return state_eval(game, depth, maximizingPlayer)
-    # Ici, le joueur choisit une pièce pour l’autre
-    available_pieces = list(set(range(16)) - set(game._board.ravel()))
-    if maximizingPlayer:
-        best = -float('inf')
-        for piece in available_pieces:
             g = deepcopy(game)
+            piece_ok = False
+            while not piece_ok:
+                piece = random.randint(0,16)
+                if piece in available_pieces:
+                    piece_ok = True
             g.select(piece)
-            val = minmax3(g, depth-1, not maximizingPlayer)
-            best = max(best, val)
-            alpha = max(alpha, best)
-            if beta <= alpha:
-                break
-        return best
-    else:
-        best = float('inf')
-        for piece in available_pieces:
-            g = deepcopy(game)
-            g.select(piece)
-            val = minmax3(g, depth-1, not maximizingPlayer)
+            val = minmax2(g, depth-1, "placement", not maximizingPlayer)
             best = min(best, val)
-            beta = min(beta, best)
-            if beta <= alpha:
+            return best
+'''
+
+def negamax_placement_specialized(game, depth, phase, alpha=-INF, beta=INF):
+    """Négamax avec α–β, spécialisé sur la phase 'placement'.
+       Phase 'selection' = un seul tirage aléatoire d'une pièce disponible.
+    """
+    # Terminal / horizon
+    if depth == 0 or game.check_winner() != -1 or game.check_finished():
+        return eval_for_current_player(game, depth)
+
+    if phase == "placement":
+        best = -INF
+        # On doit placer la pièce déjà sélectionnée
+        moves = get_all_possible_moves(game)  # iterable de (x, y)
+
+        for (x, y) in moves:
+            g = deepcopy(game)
+            g.place(x, y)
+            # après un placement on passe à la phase "selection"
+            val = negamax_placement_specialized(g, depth-1, "selection", beta, alpha)
+            if val > best:
+                best = val
+            if best > alpha:
+                alpha = best
+            if alpha >= beta:
+                break  # élagage alpha-beta
+        return best
+
+    elif phase == "selection":
+        # Ici, tu voulais explicitement un choix aléatoire d'UNE seule pièce
+        available_pieces = list(set(range(16)) - set(game._board.ravel()))
+        if not available_pieces:
+            # plus de pièces à donner : évalue la position
+            return eval_for_current_player(game, depth)
+
+        piece = random.choice(available_pieces)
+        g = deepcopy(game)
+        g.select(piece)
+        g._current_player = (g.get_current_player() + 1) % game.MAX_PLAYERS
+        return -negamax_placement_specialized(g, depth-1, "placement", -beta, -alpha)
+
+def negamax_selection_specialized(game, depth, phase, alpha=-INF, beta=INF):
+    if depth == 0 or game.check_winner() != -1 or game.check_finished():
+        return eval_for_current_player(game, depth)
+    if phase == "selection":
+        best = -INF
+        available_pieces = list(set(range(16)) - set(game._board.ravel()))
+        for piece in available_pieces:
+            g = deepcopy(game)
+            g.select(piece)
+            val = -negamax_selection_specialized(g, depth-1, "placement", -beta, -alpha)
+            if val > best:
+                best = val
+            if best > alpha:
+                alpha = best
+            if alpha >= beta:
                 break
         return best
+    
+    elif phase == "placement":
+        best = -INF
+        moves = get_all_possible_moves(game)
+        choice = random.choice(moves)
+        g = deepcopy(game)
+        g.place(choice[0], choice[1])
+        return negamax_selection_specialized(g, depth-1, "selection", beta, alpha)
+
+
 
 def play_move(game, depth, joueur):
     scored_moves = []
@@ -163,14 +255,14 @@ def play_move(game, depth, joueur):
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
-                scored_moves.append((move, minmax1(game_t, depth, True,"placement"))) ## Selon moi c'est nécessairement True ici, dans le sens où c'est le move qu'on veut pour nous faire gagner !!
+                scored_moves.append((move, negamax_complete(game_t, depth, True,"placement"))) ## Selon moi c'est nécessairement True ici, dans le sens où c'est le move qu'on veut pour nous faire gagner !!
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
 
         elif joueur==2:
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
-                scored_moves.append((move,minmax2(game_t, depth, True)))
+                scored_moves.append((move,negamax_placement_specialized(game_t, depth, True)))
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
 
 
@@ -178,7 +270,7 @@ def play_move(game, depth, joueur):
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
-                scored_moves.append((move,minmax3(game_t, depth, True)))
+                scored_moves.append((move,negamax_selection_specialized(game_t, depth, True)))
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
 
 
@@ -196,21 +288,21 @@ def play_piece(game,depth, joueur):
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
                 game_t.select(piece)
-                scored_pieces.append((piece,minmax1(game_t, depth, False, "selection")))
+                scored_pieces.append((piece,negamax_complete(game_t, depth, False, "selection")))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
         
         elif joueur==2:
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
                 game_t.select(piece)
-                scored_pieces.append((piece,minmax2(game_t, depth, False)))
+                scored_pieces.append((piece,negamax_placement_specialized(game_t, depth, False)))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
         
         else:
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
                 game_t.place(piece)
-                scored_pieces.append((piece,minmax3(game_t, depth, True)))
+                scored_pieces.append((piece,negamax_selection_specialized(game_t, depth, True)))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
 
 
@@ -226,7 +318,7 @@ def get_all_possible_moves(game_state):
                 list.append((j, i))
     return list
 
-def state_eval(game_state, depth, is_maximizing, joueur):
+def state_eval(game_state, depth, joueur):
     '''
     Computes the evaluation of the state of the game
     '''
