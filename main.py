@@ -199,7 +199,7 @@ def play_until_ci_with_checkpoints(series_name: str,
             "draws_total": int(b["draws"]),
             "losses_total": int(b["games"] - b["wins"] - b["draws"]),
             "tours_moyens": (b["tours_total"] / b["games"]) if b["games"] else 0.0,
-            "temps_moyen_sec": (b["time_total_sec"] / b["games"]) if b["games"] else 0.0
+            "temps_moyen_sec": (b["total_time_sec"] / b["games"]) if b["games"] else 0.0
         }
 
         print(f"[{series_name}] Batch +{cur} => games={b['games']}, wins={b['wins']}, draws={b['draws']}, "
@@ -243,6 +243,16 @@ def main():
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
+        
+        # Série 4 : MinMax(3) vs MinMax(1)
+        series_4= "negamax_selection_specialized vs negamax_complete"
+        print(f"Lancement (CI) : {series_4}")
+        play_until_ci_with_checkpoints(series_4, args.ci_halfwidth, args.ci_level,
+                                       MinMax, (3,), MinMax, (1,),
+                                       batch_size=BATCH_SIZE,
+                                       exclude_draws=args.exclude_draws,
+                                       max_games=args.max_games)
+        
     else:
         # Mode 
         n_games = 1000  # total (sera joué en batchs BATCH_SIZE)
