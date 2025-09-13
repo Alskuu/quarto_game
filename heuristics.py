@@ -155,7 +155,8 @@ def selection_magnitudes(game):
     # diversité via entropie des bits
     H = 0.0
     for k in range(4):
-        ones = sum(((p >> k) & 1) for p in avail)
+        # La ligne suivante permet de vérifier si il y a un 1 à la position k dans la décomposition binaire de notre pièce
+        ones = sum((((p+1) >> k) & 1) for p in avail)
         zeros = len(avail) - ones
         for n in (zeros, ones):
             if n > 0:
@@ -167,7 +168,7 @@ def selection_magnitudes(game):
 # Évaluation ABSOLUE (toujours ≥ 0)
 # --------------------------------
 # Poids heuristiques (à calibrer)
-W_IW, W_FK, W_P3, W_MOB, W_BLK = 80, 25, 12, 1, 10
+W_IW, W_P3, W_MOB, W_BLK = 80, 12, 1, 10
 W_SAFE_MAX, W_SAFE_AVG, W_DIV = 70, 15, 3
 
 def state_eval_abs(game, phase, piece_to_place, depth):
@@ -194,13 +195,11 @@ def state_eval_abs(game, phase, piece_to_place, depth):
         if piece_to_place is None:
             return 0.0
         iw  = immediate_wins_with_piece_mag(game, piece_to_place)
-        fk  = fork_count_after_placement_mag(game, piece_to_place)
         p3  = best_line_coherence_global(game)
         mob = mobility_mag(game)
         blk = immediate_blocks_possible_mag(game, piece_to_place)
 
         score += (W_IW * iw
-                  + W_FK * fk
                   + W_P3 * p3
                   + W_MOB * mob
                   + W_BLK * blk)

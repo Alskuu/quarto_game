@@ -69,18 +69,20 @@ def minmax1(game, depth, maximizingPlayer, phase, alpha=-INF, beta=INF):
                     break
             return best
         
-def eval_for_current_player(game, depth):
+def eval_for_current_player(game, depth, phase):
     """
     Cette fonction doit renvoyer un score positif si la position est bonne
     pour LE JOUEUR QUI DOIT JOUER dans 'game' (point de vue courant).
     """
-    return state_eval(game, depth, True)
+    piece_to_place = game.get_selected_piece() if phase == "placement" else None
+    # state_eval_abs doit renvoyer une magnitude >=0 ; le signe est géré par negamax.
+    return state_eval_abs(game, depth, True)
 
 
 def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
     # Arrêt (terminal ou horizon)
     if depth == 0 or game.check_winner() != -1 or game.check_finished():
-        return eval_for_current_player(game, depth)
+        return eval_for_current_player(game, depth, phase)
 
     best = -INF
 
@@ -182,7 +184,8 @@ def negamax_placement_specialized(game, depth, phase, alpha=-INF, beta=INF):
     """
     # Terminal / horizon
     if depth == 0 or game.check_winner() != -1 or game.check_finished():
-        return eval_for_current_player(game, depth)
+        return eval_for_current_player(game, depth, phase)
+
 
     if phase == "placement":
         best = -INF
@@ -203,11 +206,8 @@ def negamax_placement_specialized(game, depth, phase, alpha=-INF, beta=INF):
         return best
 
     elif phase == "selection":
-        # Ici, tu voulais explicitement un choix aléatoire d'UNE seule pièce
+        # Choix aléatoire d'une seule pièce 
         available_pieces = list(set(range(16)) - set(game._board.ravel()))
-        if not available_pieces:
-            # plus de pièces à donner : évalue la position
-            return eval_for_current_player(game, depth)
 
         piece = random.choice(available_pieces)
         g = deepcopy(game)
@@ -217,7 +217,8 @@ def negamax_placement_specialized(game, depth, phase, alpha=-INF, beta=INF):
 
 def negamax_selection_specialized(game, depth, phase, alpha=-INF, beta=INF):
     if depth == 0 or game.check_winner() != -1 or game.check_finished():
-        return eval_for_current_player(game, depth)
+        return eval_for_current_player(game, depth, phase)
+
     if phase == "selection":
         best = -INF
         available_pieces = list(set(range(16)) - set(game._board.ravel()))
