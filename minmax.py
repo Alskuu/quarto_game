@@ -309,9 +309,9 @@ def play_piece(game,depth, joueur):
     return scored_pieces[0][0] if scored_pieces[0][1] != float('-inf') or  scored_pieces[0][1] != -1 else None 
 
 # récupère la liste de tous les coups possibles
-def get_all_possible_moves(game_state):
+def get_all_possible_moves(game):
     list = []
-    board = game_state.get_board_status()
+    board = game.get_board_status()
     for i in range(4):
         for j in range(4):
             if board[i][j] == -1:

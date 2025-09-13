@@ -27,18 +27,3 @@ def generer_pieces() -> List[Piece]:
         for p in [True, False]
     ]
 
-def verifier_victoire(grille:list[list[Any]]) -> bool:
-    lignes = grille
-    colonnes = list(zip(*grille)) # Magnifique ligne
-    diagonales = [[grille[i][i] for i in range(4)], [grille[i][3 - i] for i in range(4)]]
-
-    for groupe in lignes + colonnes + diagonales:
-        if any(p is None for p in groupe):
-            continue
-        for attr in ['hauteur', 'couleur', 'forme', 'plein']:
-            valeurs = [getattr(p, attr) for p in groupe]
-            # getattr(x, 'y') is equivalent to x.y
-            if all(v == valeurs[0] for v in valeurs):
-                return True
-    return False
-
