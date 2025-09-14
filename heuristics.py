@@ -166,7 +166,7 @@ def selection_magnitudes(game):
     H = 0.0
     for k in range(4):
         # La ligne suivante permet de vérifier si il y a un 1 à la position k dans la décomposition binaire de notre pièce
-        ones = sum((((p+1) >> k) & 1) for p in avail)
+        ones = sum(((p >> k) & 1) for p in avail)
         zeros = len(avail) - ones
         for n in (zeros, ones):
             if n > 0:
@@ -174,10 +174,8 @@ def selection_magnitudes(game):
                 H -= p * math.log2(p)
     return safe_max, safe_avg, H
 
-# --------------------------------
+
 # Évaluation ABSOLUE (toujours ≥ 0)
-# --------------------------------
-# Poids heuristiques (à calibrer)
 W_IW, W_P3, W_MOB, W_BLK = 80, 12, 1, 10
 W_SAFE_MAX, W_SAFE_AVG, W_DIV = 70, 15, 3
 
