@@ -17,7 +17,7 @@ from quarto_gui import QuartoGUI
 
 BATCH_SIZE = 25
 RESULTS_PATH = "resultats.json"
-RESULTS_CI_PATH = "resultats_ci.json"
+RESULTS_CI_PATH = "resultats_cii.json"
 
 # Création de fonctions permettant d'arrêter les parties lorsque nous avons une bonne confiance dans nos résultats
 def z_from_conf(level: float) -> float:
