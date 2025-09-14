@@ -83,9 +83,7 @@ def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
     # Arrêt (terminal ou horizon)
     if depth == 0 or game.check_winner() != -1 or game.check_finished():
         return eval_for_current_player(game, depth, phase)
-
     best = -INF
-
     if phase == "placement":
         # On place la pièce déjà sélectionnée
         moves = get_all_possible_moves(game)  # liste de (x, y)
@@ -93,13 +91,14 @@ def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
             g = deepcopy(game)
             g.place(x, y)
             # après un placement on passe à la phase "selection"
-            val = negamax_complete(g, depth-1, "selection", beta, alpha)
-            if val > best:
-                best = val
-            if best > alpha:
-                alpha = best
-            if alpha >= beta:
-                break  # élagage α–β
+            val = negamax_complete(g, depth-1, "selection", alpha, beta)
+            if val > 0:
+                if val > best:
+                    best = val
+                if best > alpha:
+                    alpha = best
+                if alpha >= beta:
+                    break  # élagage α–β
         return best
 
     elif phase == "selection":
@@ -196,7 +195,7 @@ def negamax_placement_specialized(game, depth, phase, alpha=-INF, beta=INF):
             g = deepcopy(game)
             g.place(x, y)
             # après un placement on passe à la phase "selection"
-            val = negamax_placement_specialized(g, depth-1, "selection", beta, alpha)
+            val = negamax_placement_specialized(g, depth-1, "selection", alpha, beta)
             if val > best:
                 best = val
             if best > alpha:
@@ -239,7 +238,7 @@ def negamax_selection_specialized(game, depth, phase, alpha=-INF, beta=INF):
         choice = random.choice(moves)
         g = deepcopy(game)
         g.place(choice[0], choice[1])
-        return negamax_selection_specialized(g, depth-1, "selection", beta, alpha)
+        return negamax_selection_specialized(g, depth-1, "selection", alpha, beta)
 
 
 

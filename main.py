@@ -15,7 +15,7 @@ from joueurs.HumanPlayer import HumanPlayer
 from joueurs.MinMax_Player import MinMax
 from quarto_gui import QuartoGUI
 
-BATCH_SIZE = 100
+BATCH_SIZE = 25
 RESULTS_PATH = "resultats.json"
 RESULTS_CI_PATH = "resultats_ci.json"
 
@@ -217,38 +217,48 @@ def play_until_ci_with_checkpoints(series_name: str,
 def main():
     if args.ci:
         # --- MODE ARRÊT ADAPTATIF ---
-        # Série 1 : Random vs MinMax(3)
-        series_1 = "Random vs negamax_selection_specialized"
+        # Série 1 : Random vs MinMax(1)
+        '''
+        series_1 = "Random vs negamax_placement_specialized"
         print(f"Lancement (CI) : {series_1}")
         play_until_ci_with_checkpoints(series_1, args.ci_halfwidth, args.ci_level,
-                                       RandomPlayer, (), MinMax, (3,),
+                                       RandomPlayer, (), MinMax, (2,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
-
-        # Série 2 : MinMax(1) vs MinMax(2)
-        series_2 = "negamax_complete vs negamax_placement_specialized"
+        '''
+        # Série 2 : Random vs MinMax(1)
+        series_2 = "Random vs negamax_complete"
         print(f"Lancement (CI) : {series_2}")
         play_until_ci_with_checkpoints(series_2, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (1,), MinMax, (2,),
+                                       RandomPlayer, (), MinMax, (2,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
 
-        # Série 3 : MinMax(2) vs MinMax(3)
-        series_3 = "negamax_placement_specialized vs negamax_selection_specialized"
-        print(f"Lancement (CI) : {series_3}")
+        # Série 3 : MinMax(1) vs MinMax(1)
+        series_3 = "negamax_complete vs negamax_complete"
+        print(f"Lancement (CI) : {series_2}")
         play_until_ci_with_checkpoints(series_3, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (2,), MinMax, (3,),
+                                       MinMax, (1,), MinMax, (1,),
+                                       batch_size=BATCH_SIZE,
+                                       exclude_draws=args.exclude_draws,
+                                       max_games=args.max_games)
+
+        # Série 4 : MinMax(2) vs MinMax(2)
+        series_4 = "negamax_placement_specialized vs negamax_placement_specialized"
+        print(f"Lancement (CI) : {series_4}")
+        play_until_ci_with_checkpoints(series_4, args.ci_halfwidth, args.ci_level,
+                                       MinMax, (2,), MinMax, (2,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
         
-        # Série 4 : MinMax(3) vs MinMax(1)
-        series_4= "negamax_selection_specialized vs negamax_complete"
-        print(f"Lancement (CI) : {series_4}")
-        play_until_ci_with_checkpoints(series_4, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (3,), MinMax, (1,),
+        # Série 5 : MinMax(3) vs MinMax(3)
+        series_5= "negamax_selection_specialized vs negamax_selection_specialized"
+        print(f"Lancement (CI) : {series_5}")
+        play_until_ci_with_checkpoints(series_5, args.ci_halfwidth, args.ci_level,
+                                       MinMax, (3,), MinMax, (3,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
@@ -286,10 +296,10 @@ if __name__ == '__main__':
     parser.add_argument("--ci-level", type=float, default=0.95,
                         help="Niveau de confiance (ex: 0.95).")
     parser.add_argument("--ci-halfwidth", type=float, default=0.02,
-                        help="Demi-largeur cible (ex: 0.02 pour ±2 points).")
+                        help="Demi-largeur cible (ex: 0.03 pour ±3 points).")
     parser.add_argument("--exclude-draws", action="store_true",
                         help="Estimer p = P(win | décisif) en excluant les nulles du dénominateur.")
-    parser.add_argument("--max-games", type=int, default=5000,
+    parser.add_argument("--max-games", type=int, default=1200,
                         help="Garde-fou : nombre maximum de parties.")
     parser.add_argument("--gui", action="store_true", help="Run the graphical interface")
     args = parser.parse_args()
