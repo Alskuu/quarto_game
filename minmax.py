@@ -15,7 +15,7 @@ def minmax1(game, depth, maximizingPlayer, phase, alpha=-INF, beta=INF):
     
     if depth == 0 or game.check_winner() != -1:
         return state_eval(game, depth, maximizingPlayer)
-    
+
     if phase == "placement":
         # On doit placer la pièce donnée
         moves = get_all_possible_moves(game)
@@ -84,6 +84,9 @@ def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
     if depth == 0 or game.check_winner() != -1 or game.check_finished():
         return eval_for_current_player(game, depth, phase)
     best = -INF
+    # On stocke les conditions initiales, c'est important pour notre jeu
+    if depth == 3:
+        ci 
     if phase == "placement":
         # On place la pièce déjà sélectionnée
         moves = get_all_possible_moves(game)  # liste de (x, y)

@@ -164,12 +164,12 @@ def selection_magnitudes(game):
             if n > 0:
                 p = n / len(avail)
                 H -= p * math.log2(p)
-    return tox_max, tox_avg, H
+    return safe_max, safe_avg, H
 
 
 # Évaluation ABSOLUE (toujours ≥ 0)
 W_IW, W_MOB, W_BLK = 80, 1, 50
-W_TOX_MAX, W_TOX_AVG, W_DIV = 70, 15, 3
+W_SAFE_MAX, W_SAFE_AVG, W_DIV = 50, 15, 3
 
 def state_eval_abs(game, phase, piece_to_place, depth):
     """
@@ -192,21 +192,18 @@ def state_eval_abs(game, phase, piece_to_place, depth):
 
     score = 0.0
 
-    if phase == "placement":
-        if piece_to_place is None:
-            return 0.0
+    if piece_to_place is not None:
         iw  = immediate_wins_with_piece_mag(g, piece_to_place)
         mob = mobility_mag(g)
         blk = immediate_blocks_possible_mag(g, piece_to_place)
 
         score += (W_IW * iw
-                  + W_MOB * mob
-                  + W_BLK * blk)
+                + W_MOB * mob
+                + W_BLK * blk)
 
-    elif phase == "selection":
-        tox_max, tox_avg, Hdiv = selection_magnitudes(g)
-        score += (W_TOX_MAX * tox_max
-                  + W_TOX_AVG * tox_avg
+    safe_max, safe_avg, Hdiv = selection_magnitudes(g)
+    score += (W_SAFE_MAX * safe_max
+                + W_SAFE_AVG * safe_avg
                   + W_DIV * Hdiv)
 
     return max(0.0, float(score))
