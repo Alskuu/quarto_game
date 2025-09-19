@@ -1,7 +1,7 @@
 import partie 
 import numpy as np
 import copy
-from minmax import play_move, play_piece, MAX_DEPTH
+from minmax import play_move, play_piece
 import random
 # On crée trois joueurs minmax : un spécialisé aussi bien dans le placement de pièces que dans le choix des pièces, un seulement dans le placement et un seulement dans le choix
 # Voyons voir lequel est le meilleur
