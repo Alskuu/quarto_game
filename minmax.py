@@ -79,6 +79,7 @@ def eval_for_current_player(game, depth, phase):
 
 
 def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
+    # On ne considère piece et move qu'au premier tour
     # Arrêt (terminal ou horizon)
     if depth == 0 or game.check_winner() != -1 or game.check_finished():
         return eval_for_current_player(game, depth, phase)
@@ -91,20 +92,13 @@ def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
             g.place(x, y)
             # après un placement on passe à la phase "selection"
             val = -negamax_complete(g, depth-1, "selection", -beta, -alpha)
-            if val > 0:
-                if val > best:
-                    best = val
-                if best > alpha:
-                    alpha = best
-                if alpha >= beta:
-                    break  # élagage α–β
-            else:
-                if val < -best:
-                    best=val
-                if best < beta:
-                    beta = best
-                if beta <= alpha:
-                    break
+            
+            if val > best:
+                best = val
+            if best > alpha:
+                alpha = best
+            if alpha >= beta:
+                break  # élagage α–β
         return best
 
     elif phase == "selection":
@@ -116,20 +110,12 @@ def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
             # Après la sélection, on change de joueur, et donc on veut minimiser le score du joueur adverse
             # après la sélection on passe à la phase "placement"
             val = negamax_complete(g, depth-1, "placement", alpha, beta)
-            if val > 0:
-                if val > best:
-                    best = val
-                if best > alpha:
-                    alpha = best
-                if alpha >= beta:
-                    break  # élagage α–β
-            else:
-                if val < -best:
-                    best=val
-                if best < beta:
-                    beta = best
-                if beta <= alpha:
-                    break
+            if val > best:
+                best = val
+            if best > alpha:
+                alpha = best
+            if alpha >= beta:
+                break  # élagage α–β
         return best
 '''
 def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-INF, beta:float=INF):
@@ -268,14 +254,15 @@ def play_move(game, depth, joueur):
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
-                scored_moves.append((move, negamax_complete(game_t, depth,"placement"))) ## Selon moi c'est nécessairement True ici, dans le sens où c'est le move qu'on veut pour nous faire gagner !!
+                scored_moves.append((move, negamax_complete(game_t, depth,"selection")))
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
 
         elif joueur==2:
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
-                scored_moves.append((move,negamax_placement_specialized(game_t, depth, "placement")))
+                # On a placé notre pièce, reste plus qu'à voir les possibilités qui suivent dans les sélections
+                scored_moves.append((move,negamax_placement_specialized(game_t, depth, "selection")))
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
 
 
@@ -283,7 +270,7 @@ def play_move(game, depth, joueur):
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
-                scored_moves.append((move,negamax_selection_specialized(game_t, depth, "placement")))
+                scored_moves.append((move,negamax_selection_specialized(game_t, depth, "selection")))
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
 
 
@@ -303,21 +290,22 @@ def play_piece(game,depth, joueur):
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
                 game_t.select(piece)
-                scored_pieces.append((piece,negamax_complete(game_t, depth, "selection")))
+                scored_pieces.append((piece,negamax_complete(game_t, depth, "placement")))
+                # On a selectionné notre pièce, reste plus qu'à voir les possibilités qui suivent dans les placements
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
         
         elif joueur==2:
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
                 game_t.select(piece)
-                scored_pieces.append((piece,negamax_placement_specialized(game_t, depth, "selection")))
+                scored_pieces.append((piece,negamax_placement_specialized(game_t, depth, "placement")))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
         
         else:
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
                 game_t.select(piece)
-                scored_pieces.append((piece,negamax_selection_specialized(game_t, depth, "selection")))
+                scored_pieces.append((piece,negamax_selection_specialized(game_t, depth, "placement")))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
 
     return scored_pieces[0][0] if scored_pieces[0][1] != float('-inf') or  scored_pieces[0][1] != -1 else None 
