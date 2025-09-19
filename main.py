@@ -4,8 +4,6 @@ import os
 import json
 import argparse
 import math
-import tempfile
-import shutil
 import multiprocessing as mp
 from tqdm import tqdm
 
@@ -15,7 +13,7 @@ from joueurs.HumanPlayer import HumanPlayer
 from joueurs.MinMax_Player import MinMax
 from quarto_gui import QuartoGUI
 
-BATCH_SIZE = 25
+BATCH_SIZE = 16
 RESULTS_PATH = "resultats.json"
 RESULTS_CI_PATH = "resultats_cii.json"
 
@@ -218,7 +216,7 @@ def main():
     if args.ci:
         # --- MODE ARRÊT ADAPTATIF ---
         # Série 1 : Random vs MinMax(1)
-        '''
+        
         series_1 = "Random vs negamax_placement_specialized"
         print(f"Lancement (CI) : {series_1}")
         play_until_ci_with_checkpoints(series_1, args.ci_halfwidth, args.ci_level,
@@ -226,7 +224,7 @@ def main():
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
-        '''
+        
         # Série 2 : Random vs MinMax(1)
         series_2 = "Random vs negamax_complete"
         print(f"Lancement (CI) : {series_2}")
@@ -295,8 +293,8 @@ if __name__ == '__main__':
                     help="Mode arrêt adaptatif : s'arrête quand l'IC (Wilson) atteint la demi-largeur cible.")
     parser.add_argument("--ci-level", type=float, default=0.95,
                         help="Niveau de confiance (ex: 0.95).")
-    parser.add_argument("--ci-halfwidth", type=float, default=0.02,
-                        help="Demi-largeur cible (ex: 0.03 pour ±3 points).")
+    parser.add_argument("--ci-halfwidth", type=float, default=0.05,
+                        help="Demi-largeur cible (ex: 0.05 pour ±5%).")
     parser.add_argument("--exclude-draws", action="store_true",
                         help="Estimer p = P(win | décisif) en excluant les nulles du dénominateur.")
     parser.add_argument("--max-games", type=int, default=1200,

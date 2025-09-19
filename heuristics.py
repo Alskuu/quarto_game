@@ -2,7 +2,7 @@ from copy import deepcopy
 import math
 
 INF = float('inf')
-WIN = 1000  # score terminal >> somme des scores des heuristiques. Le signe sera appliqué par negamax.
+WIN = 10000  # score terminal >> somme des scores des heuristiques. Le signe sera appliqué par negamax.
 
 # récupère la liste de tous les coups possibles
 def get_all_possible_moves(game):
@@ -79,14 +79,6 @@ def line_best_coherence(vals):
             best = max(best, len(filled))
     return best  # 0..3 (4 serait déjà gagné)
 
-def best_line_coherence_global(game):
-    """Cherche la ligne la plus avancée (0..3 pièces cohérentes) parmi toutes les lignes encore vivantes."""
-    best = 0
-    for line in LINES:
-        vals = line_values(game, line)
-        if line_alive(vals):
-            best = max(best, line_best_coherence(vals))
-    return best  # 0..3
 
 # ---------------------------------
 # Magnitudes positives côté PLACEMENT
@@ -172,12 +164,12 @@ def selection_magnitudes(game):
             if n > 0:
                 p = n / len(avail)
                 H -= p * math.log2(p)
-    return safe_max, safe_avg, H
+    return tox_max, tox_avg, H
 
 
 # Évaluation ABSOLUE (toujours ≥ 0)
-W_IW, W_P3, W_MOB, W_BLK = 80, 12, 1, 10
-W_SAFE_MAX, W_SAFE_AVG, W_DIV = 70, 15, 3
+W_IW, W_MOB, W_BLK = 80, 1, 50
+W_TOX_MAX, W_TOX_AVG, W_DIV = 70, 15, 3
 
 def state_eval_abs(game, phase, piece_to_place, depth):
     """
@@ -204,19 +196,17 @@ def state_eval_abs(game, phase, piece_to_place, depth):
         if piece_to_place is None:
             return 0.0
         iw  = immediate_wins_with_piece_mag(g, piece_to_place)
-        p3  = best_line_coherence_global(g)
         mob = mobility_mag(g)
         blk = immediate_blocks_possible_mag(g, piece_to_place)
 
         score += (W_IW * iw
-                  + W_P3 * p3
                   + W_MOB * mob
                   + W_BLK * blk)
 
     elif phase == "selection":
-        safe_max, safe_avg, Hdiv = selection_magnitudes(g)
-        score += (W_SAFE_MAX * safe_max
-                  + W_SAFE_AVG * safe_avg
+        tox_max, tox_avg, Hdiv = selection_magnitudes(g)
+        score += (W_TOX_MAX * tox_max
+                  + W_TOX_AVG * tox_avg
                   + W_DIV * Hdiv)
 
     return max(0.0, float(score))

@@ -17,9 +17,9 @@ class MinMax(partie.Player):
     
     def get_depth(self):
         if self.joueur==1:
-            return 4
+            return 3
         else:
-            return 8
+            return 6
 # En effet, comme les deux autres joueurs ne calculent que le placement ou la sélection 
 # et donc à l'autre phase, le programme tourne plus rapidement bien que l'on perde un de profondeur. 
 

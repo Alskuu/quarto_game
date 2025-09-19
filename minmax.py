@@ -3,11 +3,10 @@ import random
 import itertools
 import numpy
 
-from heuristics import get_all_possible_moves, state_eval_abs
+from .heuristics import get_all_possible_moves, state_eval_abs
 
 EVAL_TIE = 0  # cette valeur pour les matchs nuls a seulement un intérêt en fin de jeu, où l'heuristique n'importera plus
 EVAL_WIN = 10000 # Grand score qui doit être largement supérieur à la somme des heuristiques.
-MAX_DEPTH = 4
 INF = float('inf')
 
 # Les lignes suivantes sont inspirées du pseudo-code du alphabeta pruning sur le wikipedia d'alpha-beta pruning
@@ -91,7 +90,7 @@ def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
             g = deepcopy(game)
             g.place(x, y)
             # après un placement on passe à la phase "selection"
-            val = negamax_complete(g, depth-1, "selection", alpha, beta)
+            val = -negamax_complete(g, depth-1, "selection", -beta, -alpha)
             if val > 0:
                 if val > best:
                     best = val
@@ -99,6 +98,13 @@ def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
                     alpha = best
                 if alpha >= beta:
                     break  # élagage α–β
+            else:
+                if val < -best:
+                    best=val
+                if best < beta:
+                    beta = best
+                if beta <= alpha:
+                    break
         return best
 
     elif phase == "selection":
@@ -109,13 +115,21 @@ def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
             g.select(piece)
             # Après la sélection, on change de joueur, et donc on veut minimiser le score du joueur adverse
             # après la sélection on passe à la phase "placement"
-            val = -negamax_complete(g, depth-1, "placement", -beta, -alpha)
-            if val > best:
-                best = val
-            if best > alpha:
-                alpha = best
-            if alpha >= beta:
-                break
+            val = negamax_complete(g, depth-1, "placement", alpha, beta)
+            if val > 0:
+                if val > best:
+                    best = val
+                if best > alpha:
+                    alpha = best
+                if alpha >= beta:
+                    break  # élagage α–β
+            else:
+                if val < -best:
+                    best=val
+                if best < beta:
+                    beta = best
+                if beta <= alpha:
+                    break
         return best
 '''
 def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-INF, beta:float=INF):
@@ -195,7 +209,7 @@ def negamax_placement_specialized(game, depth, phase, alpha=-INF, beta=INF):
             g = deepcopy(game)
             g.place(x, y)
             # après un placement on passe à la phase "selection"
-            val = negamax_placement_specialized(g, depth-1, "selection", alpha, beta)
+            val = -negamax_placement_specialized(g, depth-1, "selection", -beta, -alpha)
             if val > best:
                 best = val
             if best > alpha:
@@ -211,7 +225,7 @@ def negamax_placement_specialized(game, depth, phase, alpha=-INF, beta=INF):
         piece = random.choice(available_pieces)
         g = deepcopy(game)
         g.select(piece)
-        return -negamax_placement_specialized(g, depth-1, "placement", -beta, -alpha)
+        return negamax_placement_specialized(g, depth-1, "placement", alpha, beta)
 
 def negamax_selection_specialized(game, depth, phase, alpha=-INF, beta=INF):
     if depth == 0 or game.check_winner() != -1 or game.check_finished():
