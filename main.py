@@ -15,7 +15,7 @@ from quarto_gui import QuartoGUI
 
 BATCH_SIZE = 16
 RESULTS_PATH = "resultats.json"
-RESULTS_CI_PATH = "resultats_cii.json"
+RESULTS_CI_PATH = "resultats_cibisss_prof_3_selec.json"
 
 # Création de fonctions permettant d'arrêter les parties lorsque nous avons une bonne confiance dans nos résultats
 def z_from_conf(level: float) -> float:
@@ -216,47 +216,47 @@ def main():
     if args.ci:
         # --- MODE ARRÊT ADAPTATIF ---
         # Série 1 : Random vs MinMax(1)
-        
-        series_1 = "Random vs negamax_placement_specialized"
+        '''
+        series_1 = "negamax_placement_specialized vs negamax_complete"
         print(f"Lancement (CI) : {series_1}")
         play_until_ci_with_checkpoints(series_1, args.ci_halfwidth, args.ci_level,
-                                       RandomPlayer, (), MinMax, (2,),
+                                       MinMax, (2,), MinMax, (1,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
         
         # Série 2 : Random vs MinMax(1)
-        series_2 = "Random vs negamax_complete"
+        series_2 = "negamax_placement_specialized vs negamax_complete"
         print(f"Lancement (CI) : {series_2}")
         play_until_ci_with_checkpoints(series_2, args.ci_halfwidth, args.ci_level,
-                                       RandomPlayer, (), MinMax, (2,),
+                                       MinMax, (2,), MinMax, (1,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
 
-        # Série 3 : MinMax(1) vs MinMax(1)
-        series_3 = "negamax_complete vs negamax_complete"
+        # Série 3 : MinMax(1) vs MinMax(3)
+        series_3 = "negamax_complete vs negamax_selection_complete"
         print(f"Lancement (CI) : {series_2}")
         play_until_ci_with_checkpoints(series_3, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (1,), MinMax, (1,),
+                                       MinMax, (1,), MinMax, (3,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
-                                       max_games=args.max_games)
+                                       max_games=args.max_games)'''
 
-        # Série 4 : MinMax(2) vs MinMax(2)
-        series_4 = "negamax_placement_specialized vs negamax_placement_specialized"
+         # Série 5 : MinMax(3) vs MinMax(3)
+        series_4= "negamax_selection_specialized vs negamax_placement_specialized"
         print(f"Lancement (CI) : {series_4}")
         play_until_ci_with_checkpoints(series_4, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (2,), MinMax, (2,),
+                                       MinMax, (3,), MinMax, (2,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
         
         # Série 5 : MinMax(3) vs MinMax(3)
-        series_5= "negamax_selection_specialized vs negamax_selection_specialized"
+        series_5= "negamax_placement_specialized vs negamax_selection_specialized"
         print(f"Lancement (CI) : {series_5}")
         play_until_ci_with_checkpoints(series_5, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (3,), MinMax, (3,),
+                                       MinMax, (2,), MinMax, (3,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
@@ -267,7 +267,7 @@ def main():
         # Série 1
         series_1 = "Random vs negamax_selection_specialized"
         print(f"Lancement de la série : {series_1}")
-        play_series_with_checkpoints(series_1, n_games, RandomPlayer, (), MinMax, (3,))
+        play_series_with_checkpoints(series_1, n_games, MinMax, (1,), MinMax, (3,))
         # Série 2
         series_2 = "negamax_complete vs negamax_placement_specialized"
         print(f"Lancement de la série : {series_2}")
@@ -293,8 +293,8 @@ if __name__ == '__main__':
                     help="Mode arrêt adaptatif : s'arrête quand l'IC (Wilson) atteint la demi-largeur cible.")
     parser.add_argument("--ci-level", type=float, default=0.95,
                         help="Niveau de confiance (ex: 0.95).")
-    parser.add_argument("--ci-halfwidth", type=float, default=0.05,
-                        help="Demi-largeur cible (ex: 0.05 pour ±5%).")
+    parser.add_argument("--ci-halfwidth", type=float, default=0.07,
+                        help="Demi-largeur cible (ex: 0.07 pour ±7%).")
     parser.add_argument("--exclude-draws", action="store_true",
                         help="Estimer p = P(win | décisif) en excluant les nulles du dénominateur.")
     parser.add_argument("--max-games", type=int, default=1200,

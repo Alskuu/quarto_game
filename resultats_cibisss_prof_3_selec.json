@@ -1,0 +1,65 @@
+{
+  "negamax_selection_specialized vs negamax_placement_specialized": {
+    "games": 160,
+    "wins": 124,
+    "draws": 1,
+    "tours_total": 93.875,
+    "total_time_sec": 33766.412660360336
+  },
+  "negamax_selection_specialized vs negamax_placement_specialized (meta)": {
+    "confidence_level": 0.95,
+    "target_halfwidth": 0.07,
+    "exclude_draws": false,
+    "p_win_estimate": 0.775,
+    "halfwidth": 0.06426510068205957,
+    "denominator_used": 160,
+    "games_total": 160,
+    "wins_total": 124,
+    "draws_total": 1,
+    "losses_total": 35,
+    "tours_moyens": 0.58671875,
+    "temps_moyen_sec": 211.0400791272521
+  },
+  "negamax_placement_specialized vs negamax_selection_specialized": {
+    "games": 96,
+    "wins": 13,
+    "draws": 0,
+    "tours_total": 59.6875,
+    "total_time_sec": 21929.38282251358
+  },
+  "negamax_placement_specialized vs negamax_selection_specialized (meta)": {
+    "confidence_level": 0.95,
+    "target_halfwidth": 0.07,
+    "exclude_draws": false,
+    "p_win_estimate": 0.13541666666666666,
+    "halfwidth": 0.06856716028166639,
+    "denominator_used": 96,
+    "games_total": 96,
+    "wins_total": 13,
+    "draws_total": 0,
+    "losses_total": 83,
+    "tours_moyens": 0.6217447916666666,
+    "temps_moyen_sec": 228.43107106784979
+  },
+  "negamax_selection_specialized vs negamax_selection_specialized": {
+    "games": 700,
+    "wins": 337,
+    "draws": 0,
+    "tours_total": 183.64000000000001,
+    "total_time_sec": 124899.40257167816
+  },
+  "negamax_selection_specialized vs negamax_selection_specialized (meta)": {
+    "confidence_level": 0.95,
+    "target_halfwidth": 0.02,
+    "exclude_draws": false,
+    "p_win_estimate": 0.48142857142857143,
+    "halfwidth": 0.036913270810243794,
+    "denominator_used": 700,
+    "games_total": 700,
+    "wins_total": 337,
+    "draws_total": 0,
+    "losses_total": 363,
+    "tours_moyens": 0.26234285714285716,
+    "temps_moyen_sec": 178.42771795954022
+  }
+}

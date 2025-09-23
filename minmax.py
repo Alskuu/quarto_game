@@ -3,7 +3,7 @@ import random
 import itertools
 import numpy
 
-from .heuristics import get_all_possible_moves, state_eval_abs
+from heuristics import get_all_possible_moves, state_eval_abs
 
 EVAL_TIE = 0  # cette valeur pour les matchs nuls a seulement un intérêt en fin de jeu, où l'heuristique n'importera plus
 EVAL_WIN = 10000 # Grand score qui doit être largement supérieur à la somme des heuristiques.
@@ -84,9 +84,6 @@ def negamax_complete(game, depth, phase, alpha=-INF, beta=INF):
     if depth == 0 or game.check_winner() != -1 or game.check_finished():
         return eval_for_current_player(game, depth, phase)
     best = -INF
-    # On stocke les conditions initiales, c'est important pour notre jeu
-    if depth == 3:
-        ci 
     if phase == "placement":
         # On place la pièce déjà sélectionnée
         moves = get_all_possible_moves(game)  # liste de (x, y)
