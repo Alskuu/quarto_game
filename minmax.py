@@ -126,10 +126,7 @@ def state_eval(game_state, depth, is_maximizing, joueur):
     '''
     Computes the evaluation of the state of the game
     '''
-    if joueur ==1:
-        max_depth = 3
-    else:
-        max_depth = 6
+    max_depth = 4
     if game_state.check_winner() != -1:
         return -EVAL_WIN + depth if not is_maximizing else EVAL_WIN - (max_depth - depth) 
         # Lorsque le joueur adverse a joué juste avant nous avons is_maximizing = True et donc ici cela signifie que le minmaxplayer concerné a perdu
