@@ -27,7 +27,7 @@ class Quarto(object):
     def __init__(self) -> None:
         self.__players = ()
         self.reset()
-        self.__observers = []  # liste des callbacks
+        self.__observers = []  # liste des callbacks, utiles pour le giu
         self.current_tour = 1
         
 
@@ -53,6 +53,10 @@ class Quarto(object):
             new_game.__observers = []
             return new_game
 
+        # Une deepcopy est une copie indépendante, récursive et complète de notre objet
+        # On renvoie une deepcopy pour protéger l’état interne du jeu.
+        # Ainsi, même si le joueur modifie l’objet retourné, cela n’affectera pas
+        # les vraies pièces utilisées dans la partie.
 
     def reset(self):
         self._board = np.ones(
@@ -87,7 +91,6 @@ class Quarto(object):
         Place piece in coordinates (x, y). Returns true on success
         '''
         if self.__placeable(x, y):
-            #print(f'Piazzando in: {x,y}')
             self._board[y, x] = self.__selected_piece_index
             self.__binary_board[y,
                                 x][:] = self.__pieces[self.__selected_piece_index].binary
@@ -97,28 +100,6 @@ class Quarto(object):
 
     def __placeable(self, x: int, y: int) -> bool:
         return not (y < 0 or x < 0 or x > 3 or y > 3 or self._board[y, x] >= 0)
-
-    def print(self):
-        '''
-        Print the board
-        '''
-        for row in self._board:
-            print("\n -------------------")
-            print("|", end="")
-            for element in row:
-                print(f" {element: >2}", end=" |")
-        print("\n -------------------\n")
-        print(f"Selected piece: {self.__selected_piece_index}\n")
-
-    def get_piece_charachteristics(self, index: int) -> Piece:
-        '''
-        Gets charachteristics of a piece (index-based)
-        '''
-        return copy.deepcopy(self.__pieces[index]) 
-        # Une deepcopy est une copie indépendante, récursive et complète de notre objet
-        # On renvoie une deepcopy pour protéger l’état interne du jeu.
-        # Ainsi, même si le joueur modifie l’objet retourné, cela n’affectera pas
-        # les vraies pièces utilisées dans la partie.
 
     def get_board_status(self) -> np.ndarray:
         '''

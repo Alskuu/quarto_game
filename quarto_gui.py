@@ -70,7 +70,7 @@ class QuartoGUI:
         )
         self.canvas.pack()
 
-        # Zone pour les pièces non utilisées (maintenant en dessous du plateau)
+        # Zone pour les pièces non utilisées (en dessous du plateau)
         self.available_pieces_frame = tk.Frame(self.root)
         self.available_pieces_frame.pack(pady=10)
         

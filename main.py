@@ -15,7 +15,7 @@ from quarto_gui import QuartoGUI
 
 BATCH_SIZE = 16
 RESULTS_PATH = "resultats.json"
-RESULTS_CI_PATH = "resultats_cibisss_prof_3_selec.json"
+RESULTS_CI_PATH = "resultats_cibisss_prof_3.json"
 
 # Création de fonctions permettant d'arrêter les parties lorsque nous avons une bonne confiance dans nos résultats
 def z_from_conf(level: float) -> float:
@@ -92,7 +92,7 @@ def run_matchup(args):
     winner = game.run()
     time_end = time.time()
     time_taken = time_end - time_start
-    tour = game.check_tour()
+    tour = game.check_tour() # On a fait une erreur ici, le run devrait renvoyer le numéro du dernier tour si on veut avoir le numéro, je me suis rendu compte de l'erreur en rédigeant le rapport final après avoir fait tourné pendant plusieurs heures les parties, donc je ne me relancerai pas là-dedans.
     return winner, tour, time_taken
 
 def run_multiple_games(n_games, player1_cls, player1_args, player2_cls, player2_args, n_jobs=mp.cpu_count()):
@@ -174,7 +174,7 @@ def play_until_ci_with_checkpoints(series_name: str,
 
         # Checkpoint (cumuler et écrire)
         results = accumulate(results, series_name, cur, wr, dr, tours_total, time_total)
-        # On calcule l'IC sur le bucket à jour AVANT d’écrire la méta
+        # On calcule l'IC sur le bucket à jour avant d’écrire la méta
         b = results[series_name]
         p_hat, half, denom_used = estimate_ci(
             wins=int(b["wins"]),
@@ -184,7 +184,7 @@ def play_until_ci_with_checkpoints(series_name: str,
             exclude_draws=exclude_draws
         )
 
-        # On ajoute une section 'meta' (non destructive) pour visualiser l’état de l’IC
+        # On ajoute une section 'meta' pour visualiser l’état de l’IC
         results[series_name + " (meta)"] = {
             "confidence_level": conf_level,
             "target_halfwidth": target_halfwidth,
@@ -244,19 +244,33 @@ def main():
                                        max_games=args.max_games)'''
 
          # Série 5 : MinMax(3) vs MinMax(3)
-        series_4= "negamax_selection_specialized vs negamax_placement_specialized"
+        series_4= "minmax1 vs negamax_placement_specialized"
         print(f"Lancement (CI) : {series_4}")
         play_until_ci_with_checkpoints(series_4, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (3,), MinMax, (2,),
+                                       MinMax, (4,), MinMax, (2,),
+                                       batch_size=BATCH_SIZE,
+                                       exclude_draws=args.exclude_draws,
+                                       max_games=args.max_games)
+        series_4a="negamax_placement_specialized vs minmax1"
+        print("Lancement (CI) ",series_4a )
+        play_until_ci_with_checkpoints(series_4a, args.ci_halfwidth, args.ci_level,
+                                       MinMax, (2,), MinMax, (4,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
         
         # Série 5 : MinMax(3) vs MinMax(3)
-        series_5= "negamax_placement_specialized vs negamax_selection_specialized"
+        series_5= "minmax1 vs negamax_complete"
         print(f"Lancement (CI) : {series_5}")
         play_until_ci_with_checkpoints(series_5, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (2,), MinMax, (3,),
+                                       MinMax, (4,), MinMax, (1,),
+                                       batch_size=BATCH_SIZE,
+                                       exclude_draws=args.exclude_draws,
+                                       max_games=args.max_games)
+        series_5a="negamax_complete vs minmax1"
+        print(f"Lancement (CI) : {series_5a}")
+        play_until_ci_with_checkpoints(series_5a, args.ci_halfwidth, args.ci_level,
+                                       MinMax, (1,), MinMax, (4,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
@@ -293,8 +307,8 @@ if __name__ == '__main__':
                     help="Mode arrêt adaptatif : s'arrête quand l'IC (Wilson) atteint la demi-largeur cible.")
     parser.add_argument("--ci-level", type=float, default=0.95,
                         help="Niveau de confiance (ex: 0.95).")
-    parser.add_argument("--ci-halfwidth", type=float, default=0.07,
-                        help="Demi-largeur cible (ex: 0.07 pour ±7%).")
+    parser.add_argument("--ci-halfwidth", type=float, default=0.08,
+                        help="Demi-largeur cible (ex: 0.08 pour ±8%).")
     parser.add_argument("--exclude-draws", action="store_true",
                         help="Estimer p = P(win | décisif) en excluant les nulles du dénominateur.")
     parser.add_argument("--max-games", type=int, default=1200,

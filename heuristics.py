@@ -80,9 +80,8 @@ def line_best_coherence(vals):
     return best  # 0..3 (4 serait déjà gagné)
 
 
-# ---------------------------------
 # Magnitudes positives côté PLACEMENT
-# ---------------------------------
+
 def immediate_wins_with_piece_mag(game, piece):
     """Nombre de placements (x,y) qui gagnent immédiatement avec 'piece' (>=0)."""
     count = 0
@@ -124,9 +123,7 @@ def immediate_blocks_possible_mag(game, piece):
             blocks += 1
     return blocks
 
-# --------------------------------
 # Magnitudes positives côté SELECTION
-# --------------------------------
 def toxicity_of_piece(game, piece):
     """
     Toxicité brute d'une pièce = nombre de coups adverses gagnants immédiats

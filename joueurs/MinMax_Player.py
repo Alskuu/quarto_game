@@ -58,14 +58,3 @@ class MinMax(partie.Player):
                 piece_ok = game.select(piece)
                 print("La pièce choisie est la numéro : ", piece)
             return piece
-
-  
-    def piece_available(self, piece) -> bool:
-        # Iterate over the board and check if the given piece has already been played
-        quarto = self.get_game()
-        board = quarto.get_board_status()
-        for row in board:
-            for cell in row:
-                if cell == piece:
-                    return False
-        return True

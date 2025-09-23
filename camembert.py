@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import os
 
 def tracer_camembert(json_path, dossier_sortie="resultats_graphes"):
-    # Charger les données JSON
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -14,7 +13,7 @@ def tracer_camembert(json_path, dossier_sortie="resultats_graphes"):
 
         joueur1, joueur2 = match.split(" vs ")
         games = infos["games"]
-        victoires_j2 = infos["wins"]         # victoires du joueur2
+        victoires_j2 = infos["wins"]
         nuls = infos["draws"]
         defaites_j2 = games - victoires_j2 - nuls
 

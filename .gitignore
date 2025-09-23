@@ -3,6 +3,9 @@ __pycache__/
 __pycache__/
 .mypy_cache/
 
-resultats.json
 resultats_ci.json
 resultats_cii.json
+resultats_cibis.json
+resultats_cibiss.json
+resultats_cibisss.json
+resultats_cibisss_prof_3_selec.json

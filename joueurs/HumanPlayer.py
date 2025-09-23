@@ -11,7 +11,7 @@ class HumanPlayer(partie.Player):
         # On propose de choisir une pièce libre
         board = self.get_game().get_board_status()
         all_pieces = set(range(16))
-        used_pieces = set(board.flatten()) - {-1} #Fait de la matrice avec toutes une liste 1D
+        used_pieces = set(board.flatten()) - {-1} #Fait de la matrice avec toutes les pièces une liste 1D
         available = sorted(list(all_pieces - used_pieces))
 
         print(f"Available pieces: {available}")
