@@ -127,7 +127,7 @@ def play_series_with_checkpoints(series_name: str, n_games: int,
         results = load_results(RESULTS_PATH)
         results = accumulate(results, series_name, cur, wr, dr, tours_total, time_total)
         with open(RESULTS_PATH, "w") as f:
-            json.dump(results)
+            json.dump(results,f, indent=4)
 
         # Affichage d’un petit récap en direct
         print(f"[{series_name}] Batch fini : +{cur} games, +{wr} wins, +{dr} draws")

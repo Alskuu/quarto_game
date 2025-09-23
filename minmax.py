@@ -127,9 +127,9 @@ def state_eval(game_state, depth, is_maximizing, joueur):
     Computes the evaluation of the state of the game
     '''
     if joueur ==1:
-        max_depth = 4
+        max_depth = 3
     else:
-        max_depth = 8
+        max_depth = 6
     if game_state.check_winner() != -1:
         return -EVAL_WIN + depth if not is_maximizing else EVAL_WIN - (max_depth - depth) 
         # Lorsque le joueur adverse a joué juste avant nous avons is_maximizing = True et donc ici cela signifie que le minmaxplayer concerné a perdu
@@ -200,7 +200,7 @@ def minmax1(game, depth, maximizingPlayer, phase, alpha=-INF, beta=INF):
                     break
             return best
 
-'''
+
 def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-INF, beta:float=INF):
     if depth == 0 or game.check_winner() != -1:
         return state_eval(game, depth, maximizingPlayer)
@@ -214,7 +214,7 @@ def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-INF, beta:float=IN
                 g = deepcopy(game) # C'est crucial ici : permet de ne pas modifier l'état véritable du jeu
                 g.place(move[0], move[1])
                 # après un placement, on passe à la phase "selection" de la pièce
-                val = minmax2(g, depth-1, "selection", maximizingPlayer)
+                val = minmax2(g, depth-1, "selection", not maximizingPlayer)
                 best = max(best, val)
                 alpha = max(alpha, best)
                 if beta <= alpha:
@@ -225,7 +225,7 @@ def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-INF, beta:float=IN
             for move in moves:
                 g = deepcopy(game)
                 g.place(move[0], move[1])
-                val = minmax2(g, depth-1, "selection", maximizingPlayer)
+                val = minmax2(g, depth-1, "selection", not maximizingPlayer)
                 best = min(best, val)
                 beta = min(beta, best)
                 if beta <= alpha:
@@ -242,7 +242,7 @@ def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-INF, beta:float=IN
                 if piece in available_pieces:
                     piece_ok = True
             g.select(piece)
-            val = minmax2(g, depth-1, "placement", not maximizingPlayer)
+            val = minmax2(g, depth-1, "placement", maximizingPlayer)
             best = max(best, val)
             return best
         else:
@@ -255,11 +255,69 @@ def minmax2(game, depth, maximizingPlayer,phase, alpha:float=-INF, beta:float=IN
                 if piece in available_pieces:
                     piece_ok = True
             g.select(piece)
-            val = minmax2(g, depth-1, "placement", not maximizingPlayer)
+            val = minmax2(g, depth-1, "placement", maximizingPlayer)
             best = min(best, val)
             return best
-'''
 
+def minmax3(game, depth, maximizingPlayer, phase, alpha=-INF, beta=INF):
+    # phase = "placement" ou "selection"
+    
+    if depth == 0 or game.check_winner() != -1:
+        return state_eval(game, depth, maximizingPlayer)
+
+    if phase == "placement":
+        # On doit placer la pièce donnée
+        moves = get_all_possible_moves(game)
+        if maximizingPlayer:
+            best = -INF
+            for move in moves:
+                g = deepcopy(game) # C'est crucial ici : permet de ne pas modifier l'état véritable du jeu
+                g.place(move[0], move[1])
+                # après un placement, on passe à la phase "selection"
+                val = minmax3(g, depth-1, not maximizingPlayer, "selection")
+                best = max(best, val)
+                alpha = max(alpha, best)
+                if beta <= alpha:
+                    break
+            return best
+        else:
+            best = INF
+            for move in moves:
+                g = deepcopy(game)
+                g.place(move[0], move[1])
+                val = minmax3(g, depth-1, not maximizingPlayer, "selection")
+                best = min(best, val)
+                beta = min(beta, best)
+                if beta <= alpha:
+                    break
+            return best
+    
+    elif phase == "selection":
+        # Ici, le joueur choisit une pièce pour l’autre
+        available_pieces = list(set(range(16)) - set(game._board.ravel()))
+        if maximizingPlayer:
+            best = -INF
+            for piece in available_pieces:
+                g = deepcopy(game)
+                g.select(piece)
+                # On prend la contraposée de maximizingPlayer car on change de joueur après la sélection
+                val = minmax3(g, depth-1, maximizingPlayer, "placement")
+                best = max(best, val)
+                alpha = max(alpha, best)
+                if beta <= alpha:
+                    break
+            return best
+        else:
+            best = INF
+            for piece in available_pieces:
+                g = deepcopy(game)
+                g.select(piece)
+                val = minmax3(g, depth-1, maximizingPlayer, "placement")
+                best = min(best, val)
+                beta = min(beta, best)
+                if beta <= alpha:
+                    break
+            return best
 
 def play_move(game, depth, joueur):
     scored_moves = []
