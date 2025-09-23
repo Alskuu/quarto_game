@@ -287,12 +287,19 @@ def play_move(game, depth, joueur):
                 game_t.place(move[0], move[1])
                 scored_moves.append((move,negamax_selection_specialized(game_t, depth, "selection")))
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
-        else:
+        elif joueur==4:
             for move in get_all_possible_moves(game):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
                 scored_moves.append((move, minmax1(game_t, depth, False, "selection", alpha=-INF, beta=INF)))
             scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
+        else:
+            for move in get_all_possible_moves(game):
+                game_t = deepcopy(game)
+                game_t.place(move[0], move[1])
+                scored_moves.append((move, minmax2(game_t, depth, False, "selection", alpha=-INF, beta=INF)))
+            scored_moves.sort(key=lambda x: x[1], reverse=True) # On trie dans l'ordre décroissant des scores
+
 
 
 
@@ -329,11 +336,17 @@ def play_piece(game,depth, joueur):
                 game_t.select(piece)
                 scored_pieces.append((piece,negamax_selection_specialized(game_t, depth, "placement")))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
-        else:
+        elif joueur==4:
             for piece in list(set(range(16)) - set(game._board.ravel())):
                 game_t = deepcopy(game)
                 game_t.select(piece)
                 scored_pieces.append((piece,minmax1(game_t, depth, True, "placement", alpha=-INF, beta=INF)))
+            scored_pieces.sort(key=lambda x: x[1], reverse=True)
+        else:
+            for piece in list(set(range(16)) - set(game._board.ravel())):
+                game_t = deepcopy(game)
+                game_t.select(piece)
+                scored_pieces.append((piece,minmax2(game_t, depth, True, "placement", alpha=-INF, beta=INF)))
             scored_pieces.sort(key=lambda x: x[1], reverse=True)
 
 

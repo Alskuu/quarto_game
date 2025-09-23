@@ -29,7 +29,6 @@ class MinMax(partie.Player):
         '''place_piece en utilisant minmax'''
         game = self.get_game()
         move = play_move(game, self.depth, self.joueur)
-        print("Voici ce qui pose problème : ", move)
         if move != None:
             print("La pièce a été positionné à la position :", move)
             return move

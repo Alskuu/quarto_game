@@ -225,20 +225,19 @@ def main():
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
         
-        # Série 2 : Random vs MinMax(1)
-        series_2 = "negamax_placement_specialized vs negamax_complete"
+        series_2 = "negamax_placement_specialized vs minmax2"
         print(f"Lancement (CI) : {series_2}")
         play_until_ci_with_checkpoints(series_2, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (2,), MinMax, (1,),
+                                       MinMax, (2,), MinMax, (5,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)
 
         # Série 3 : MinMax(1) vs MinMax(3)
-        series_3 = "negamax_complete vs negamax_selection_complete"
-        print(f"Lancement (CI) : {series_2}")
+        series_3 = "minmax2 vs negamax_placement_complete"
+        print(f"Lancement (CI) : {series_3}")
         play_until_ci_with_checkpoints(series_3, args.ci_halfwidth, args.ci_level,
-                                       MinMax, (1,), MinMax, (3,),
+                                       MinMax, (5,), MinMax, (2,),
                                        batch_size=BATCH_SIZE,
                                        exclude_draws=args.exclude_draws,
                                        max_games=args.max_games)'''
