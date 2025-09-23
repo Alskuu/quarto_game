@@ -1,0 +1,23 @@
+{
+  "minmax1 vs negamax_placement_specialized": {
+    "games": 16,
+    "wins": 15,
+    "draws": 0,
+    "tours_total": 10.6875,
+    "total_time_sec": 6894.61331319809
+  },
+  "minmax1 vs negamax_placement_specialized (meta)": {
+    "confidence_level": 0.95,
+    "target_halfwidth": 0.08,
+    "exclude_draws": false,
+    "p_win_estimate": 0.9375,
+    "halfwidth": 0.13608401546917345,
+    "denominator_used": 16,
+    "games_total": 16,
+    "wins_total": 15,
+    "draws_total": 0,
+    "losses_total": 1,
+    "tours_moyens": 0.66796875,
+    "temps_moyen_sec": 430.9133320748806
+  }
+}
