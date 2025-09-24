@@ -1,5 +1,12 @@
 Hello everyone and welcome to the Quarto game !
 
+Pour lancer le jeu qui s'enregistre sur un json automatiquement écrire dans le terminal ceci :  
+"python main.py--ci" ("poetry run python main.py --ci" avec poetry)
+Modifier la partie "if args.ci:" de la fonction main() dans main.py pour modifier les joueurs 
+
+Pour jouer au jeu avec une interface graphique, modifier main_gui pour modifier les joueurs et exécuter dans le terminal : 
+python main.py --gui
+
 Les pièces sont définies en binaire(-1) (False = 0 et True = 1) :
 (False, False, False, False ) # 0
 (False, False, False, True)  # 1
@@ -17,6 +24,16 @@ Les pièces sont définies en binaire(-1) (False = 0 et True = 1) :
 (True, True, False, True)  # 13
 (True, True, True, False)  # 14
 (True, True, True, True)  # 15
+
+Les joueurs sont les suivants :
+
+    - HumanPlayer : joueur humain, pouvant jouer en écrivant poetry run python main.py --gui sur le terminal 
+    - RandomPlayer : joueur qui prend toutes ses décision aléatoirement 
+    - MinMax1 : negamax$_$complete il utilise l'algorithme Negamax (variante de MiniMax ainsi que la fonction d'évaluation composée de toutes nos heuristiques). 
+    - MinMax2 : negamax$_$placement$_$specialized : pareil que MinMax1 mais l'applique que lors de la phase de placement 
+    - MinMax3 : negamax$_$selection$_$specialized : de même mais que sur la phase de sélection 
+    - MinMax4 : (minmax1 dans mon code car c'est le premier joueur que j'avais créé) algorithme classique MiniMax avec une fonction d'évaluation qui ne détecte que les fins de partie et identifie si c'est une victoire, une défaite ou un match nul. 
+    - MinMax5 : (minmax2 dans mon code) de même que MinMax4 mais applique l'algorithme que lors de la phase de placement
 
 Pour l'implémentation des algorithmes minimax et le alpha beta pruning :
 Voici les sources qui m'ont été utiles :
