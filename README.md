@@ -50,5 +50,9 @@ Tout cela grâce à la propriété de jeu à somme nulle : https://en.wikipedia.
 
 Concernant le choix des heuristiques je me suis fortement inspiré du site suivant pour pouvoir trouver les différentes idées de fonctions nécessaires (contrôle des lignes/menaces) : https://cdn.aaai.org/AAAI/2007/AAAI07-180.pdf
 
+J'ai fait de la parallélisation en créant des pools et en utilisant la librairie python multiprocessing.
+
+Et j'ai aussi utilisé une méthode statistique afin de pouvoir arrêter le lancement des parties seulement que la probabilité de victoire était statistiquement fiable en-dessous d'une marge d'erreur (intervalle de confiance de Wilson), plutôt que de devoir choisir en avance de faire N parties pour chaque affrontement entre mes joueurs, avec des N de plus en plus grands.
+
 Si vous êtes intéressés pour avoir les résultats de tous les matchs pour s'éviter les plusieurs heures nécessaires pour faire fonctionner le programme.
 Contactez moi via mon mail a.riahii@outlook.fr
